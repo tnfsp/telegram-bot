@@ -21,8 +21,9 @@ class RssClient {
     try {
       const { data } = await this.http.get(url);
       const parsed = this.parser.parse(data);
-      const items = parsed?.rss?.channel?.item || parsed?.feed?.entry || [];
-      // Normalize to an array of objects we can use
+      const rawItems = parsed?.rss?.channel?.item ?? parsed?.feed?.entry ?? [];
+      // Ensure array shape
+      const items = Array.isArray(rawItems) ? rawItems : [rawItems].filter(Boolean);
       return items.map((item) => ({
         title: item.title || 'Untitled',
         link: item.link?.href || item.link || '',
