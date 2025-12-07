@@ -1,10 +1,11 @@
 const { parseISO, isAfter, compareAsc } = require('date-fns');
 
 function buildMessage(highlight) {
-  const header = highlight.title ? `${highlight.title}` : 'Readwise Highlight';
-  const link = highlight.sourceUrl ? `\n${highlight.sourceUrl}` : '';
-  const note = highlight.note ? `\n\nNote: ${highlight.note}` : '';
-  return `${header}\n${highlight.text}${note}${link}`;
+  const title = highlight.title ? `【${highlight.title}】` : '【Readwise】';
+  const parts = [`📚 精選摘錄 #readwise`, title, highlight.text];
+  if (highlight.note) parts.push(`💡 Note: ${highlight.note}`);
+  if (highlight.sourceUrl) parts.push(`🔗 ${highlight.sourceUrl}`);
+  return parts.join('\n');
 }
 
 async function syncReadwise({
