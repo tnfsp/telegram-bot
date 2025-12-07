@@ -42,7 +42,7 @@ class ReadwiseClient {
     }));
   }
 
-  async saveHighlight({ text, title, sourceUrl }) {
+  async saveHighlight({ text, title, sourceUrl, locationType = 'article', location = 0 }) {
     if (!this.canUse()) {
       throw new Error('Readwise API token missing');
     }
@@ -59,8 +59,8 @@ class ReadwiseClient {
             text,
             title,
             source_url: sourceUrl,
-            location_type: 'video',
-            location: 0,
+            location_type: locationType, // Readwise does not accept "video"; use "article" by default
+            location,
           },
         ],
       });
