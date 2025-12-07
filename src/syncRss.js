@@ -2,21 +2,11 @@ const { parseISO, isAfter, compareAsc, formatDistanceToNowStrict } = require('da
 
 function formatMessage(item) {
   const link = item.link ? `\n${item.link}` : '';
-  let published = '';
-  if (item.publishedAt) {
-    try {
-      published = `\nPublished ${formatDistanceToNowStrict(parseISO(item.publishedAt), {
-        addSuffix: true,
-      })}.`;
-    } catch (e) {
-      published = '';
-    }
-  }
   const desc =
     item.description && item.description.length
       ? `\n\n${String(item.description).replace(/<[^>]+>/g, '').slice(0, 400)}`
       : '';
-  return `${item.title}- #blog${link}${desc}`;
+  return `📰 新文章：${item.title}- #blog${link}${desc}`;
 }
 
 async function syncRss({ rssClient, telegramClient, feeds, state, stateStore, logger }) {
