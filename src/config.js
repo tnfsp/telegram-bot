@@ -11,6 +11,8 @@ function loadConfig() {
   const {
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHANNEL_ID,
+    ALERT_CHAT_ID,
+    ALERTS_ENABLED,
     YOUTUBE_API_KEY,
     YOUTUBE_PLAYLIST_ID,
     YOUTUBE_PLAYLIST_ID_MUSIC,
@@ -40,6 +42,10 @@ function loadConfig() {
     telegram: {
       botToken: TELEGRAM_BOT_TOKEN || '',
       channelId: TELEGRAM_CHANNEL_ID || '',
+    },
+    alerts: {
+      enabled: (ALERTS_ENABLED || 'true').toLowerCase() === 'true',
+      chatId: ALERT_CHAT_ID || '',
     },
     youtube: {
       apiKey: YOUTUBE_API_KEY || '',

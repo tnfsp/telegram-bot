@@ -5,9 +5,11 @@ const { YouTubeClient } = require('./clients/youtubeClient');
 const { TelegramClient } = require('./clients/telegramClient');
 const { ReadwiseClient } = require('./clients/readwiseClient');
 const { RssClient } = require('./clients/rssClient');
+const { validateConfig } = require('./configValidation');
 const { syncYouTube } = require('./syncYouTube');
 const { syncReadwise } = require('./syncReadwise');
 const { syncRss } = require('./syncRss');
+const { createAlerter } = require('./alert');
 
 async function main() {
   const config = loadConfig();
@@ -22,6 +24,10 @@ async function main() {
     logger,
     { dryRun: config.dryRun },
   );
+  const alerter = createAlerter(telegramClient, logger, {
+    enabled: config.alerts.enabled,
+    chatId: config.alerts.chatId || config.telegram.channelId,
+  });
 
   const youtubeClient = new YouTubeClient(config.youtube.apiKey, logger);
   const readwiseClient = new ReadwiseClient(config.readwise.apiToken, logger, {
@@ -41,6 +47,10 @@ async function main() {
     },
     'Bridge starting',
   );
+
+  const validation = validateConfig(config);
+  validation.warnings.forEach((msg) => logger.warn({ msg }, 'Config warning'));
+  validation.errors.forEach((msg) => logger.error({ msg }, 'Config error'));
 
   const runYouTubeSync = async () => {
     if (!config.youtube.apiKey || !config.youtube.playlists.length) {
@@ -63,6 +73,7 @@ async function main() {
       });
     } catch (err) {
       logger.error({ err }, 'YouTube sync failed');
+      alerter.sendAlert(`YouTube sync failed: ${err.message || err}`, { err });
     }
   };
 
@@ -85,6 +96,7 @@ async function main() {
       });
     } catch (err) {
       logger.error({ err }, 'Readwise sync failed');
+      alerter.sendAlert(`Readwise sync failed: ${err.message || err}`, { err });
     }
   };
 
@@ -108,6 +120,7 @@ async function main() {
       });
     } catch (err) {
       logger.error({ err }, 'RSS sync failed');
+      alerter.sendAlert(`RSS sync failed: ${err.message || err}`, { err });
     }
   };
 

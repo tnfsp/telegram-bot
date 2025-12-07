@@ -18,6 +18,8 @@ Now also pulls RSS feeds (defaults: `https://wilsonchao.com/feed.xml`, `https://
    ```ini
    TELEGRAM_BOT_TOKEN=your_bot_token
    TELEGRAM_CHANNEL_ID=@your_channel_or_id
+   ALERTS_ENABLED=true
+   ALERT_CHAT_ID=@alert_channel_or_id_optional
    YOUTUBE_API_KEY=your_youtube_api_key
    # YouTube playlists (supports multiple)
    # Either use legacy YOUTUBE_PLAYLIST_ID or the dedicated ones below:
