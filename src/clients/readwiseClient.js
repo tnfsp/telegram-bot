@@ -43,7 +43,7 @@ class ReadwiseClient {
           title: item.title || item.book_title || 'Untitled',
           sourceUrl: item.source_url || '',
           note: item.note || '',
-          updatedAt: item.updated_at,
+          updatedAt: item.updated_at || item.updated,
           location: item.location,
         })),
       );
