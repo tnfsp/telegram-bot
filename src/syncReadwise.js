@@ -36,11 +36,14 @@ function normalizeHighlight(highlight) {
 
 function buildMessage(highlight) {
   const normalized = normalizeHighlight(highlight);
-  const sourceLabel = normalized.sourceUrl ? `🔗 來源：${normalized.sourceUrl}` : '🔗 來源：未提供';
+  const isMailto = normalized.sourceUrl && /^mailto:/i.test(normalized.sourceUrl);
+  const sourceLabel = normalized.sourceUrl
+    ? `🔗 來源：${isMailto ? 'NIL' : normalized.sourceUrl}`
+    : '🔗 來源：未提供';
   const parts = [`📚 精選摘錄 #readwise`, normalized.title, normalized.text];
   if (highlight.note) parts.push(`💡 Note: ${highlight.note}`);
   parts.push(sourceLabel);
-  return parts.join('\n');
+  return [parts[0], parts[1], '```', parts[2], '```', ...parts.slice(3)].join('\n');
 }
 
 async function syncReadwise({
