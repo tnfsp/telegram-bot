@@ -1,10 +1,43 @@
 const { parseISO, isAfter, compareAsc } = require('date-fns');
 
-function buildMessage(highlight) {
-  const sourceLabel = highlight.sourceUrl ? `🔗 來源：${highlight.sourceUrl}` : '🔗 來源：未提供';
-  const cleanTitle = highlight.title && highlight.title.toLowerCase() !== 'untitled' ? highlight.title : '';
+function normalizeHighlight(highlight) {
+  // Try to extract heading and URL from the text if present.
+  const lines = (highlight.text || '').split(/\r?\n/);
+  let derivedTitle = '';
+  let derivedSourceUrl = '';
+  const remaining = [];
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (!derivedTitle && /^#+\s+/.test(line)) {
+      derivedTitle = line.replace(/^#+\s+/, '').trim();
+      continue;
+    }
+    const urlMatch = line.match(/^URL:\s*(\S+)/i);
+    if (!derivedSourceUrl && urlMatch) {
+      derivedSourceUrl = urlMatch[1];
+      continue;
+    }
+    remaining.push(line);
+  }
+
+  const cleanTitle =
+    (highlight.title && highlight.title.toLowerCase() !== 'untitled' && highlight.title) ||
+    (derivedTitle && derivedTitle.toLowerCase() !== 'untitled' && derivedTitle) ||
+    (highlight.bookTitle && highlight.bookTitle.toLowerCase() !== 'untitled' && highlight.bookTitle) ||
+    '';
+
   const title = cleanTitle ? `【${cleanTitle}】` : '【摘錄】';
-  const parts = [`📚 精選摘錄 #readwise`, title, highlight.text];
+  const sourceUrl = highlight.sourceUrl || derivedSourceUrl || '';
+  const text = remaining.join('\n') || highlight.text || '';
+
+  return { title, sourceUrl, text };
+}
+
+function buildMessage(highlight) {
+  const normalized = normalizeHighlight(highlight);
+  const sourceLabel = normalized.sourceUrl ? `🔗 來源：${normalized.sourceUrl}` : '🔗 來源：未提供';
+  const parts = [`📚 精選摘錄 #readwise`, normalized.title, normalized.text];
   if (highlight.note) parts.push(`💡 Note: ${highlight.note}`);
   parts.push(sourceLabel);
   return parts.join('\n');

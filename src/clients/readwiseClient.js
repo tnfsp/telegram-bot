@@ -41,6 +41,7 @@ class ReadwiseClient {
           id: item.id,
           text: item.text,
           title: item.title || item.book_title || 'Untitled',
+          bookTitle: item.book_title || '',
           sourceUrl: item.source_url || '',
           note: item.note || '',
           updatedAt: item.updated_at || item.updated,
