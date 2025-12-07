@@ -2,8 +2,9 @@ const { parseISO, isAfter, compareAsc } = require('date-fns');
 
 function buildMessage(highlight) {
   const sourceLabel = highlight.sourceUrl ? `🔗 來源：${highlight.sourceUrl}` : '';
-  const title = highlight.title ? `【${highlight.title}】` : '';
-  const parts = [`📚 精選摘錄 #readwise`, title || '【摘錄】', highlight.text];
+  const cleanTitle = highlight.title && highlight.title.toLowerCase() !== 'untitled' ? highlight.title : '';
+  const title = cleanTitle ? `【${cleanTitle}】` : '【摘錄】';
+  const parts = [`📚 精選摘錄 #readwise`, title, highlight.text];
   if (highlight.note) parts.push(`💡 Note: ${highlight.note}`);
   if (sourceLabel) parts.push(sourceLabel);
   return parts.join('\n');
