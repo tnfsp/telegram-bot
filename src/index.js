@@ -34,6 +34,7 @@ async function main() {
       dryRun: config.dryRun,
       stateFile: config.stateFilePath,
       youtubeIntervalMinutes: config.youtube.syncIntervalMinutes,
+      youtubePlaylists: config.youtube.playlists,
       readwiseIntervalMinutes: config.readwise.syncIntervalMinutes,
       rssIntervalMinutes: config.rss.syncIntervalMinutes,
       rssFeeds: config.rss.feeds,
@@ -42,8 +43,8 @@ async function main() {
   );
 
   const runYouTubeSync = async () => {
-    if (!config.youtube.apiKey || !config.youtube.playlistId) {
-      logger.warn('Skipping YouTube sync: API key or playlist ID missing');
+    if (!config.youtube.apiKey || !config.youtube.playlists.length) {
+      logger.warn('Skipping YouTube sync: API key or playlists missing');
       return;
     }
     if (!telegramClient.canSend()) {
@@ -55,7 +56,7 @@ async function main() {
         youtubeClient,
         telegramClient,
         readwiseClient,
-        playlistId: config.youtube.playlistId,
+        playlists: config.youtube.playlists,
         state,
         stateStore,
         logger,

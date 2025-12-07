@@ -13,6 +13,9 @@ function loadConfig() {
     TELEGRAM_CHANNEL_ID,
     YOUTUBE_API_KEY,
     YOUTUBE_PLAYLIST_ID,
+    YOUTUBE_PLAYLIST_ID_MUSIC,
+    YOUTUBE_PLAYLIST_ID_VIDEO,
+    YOUTUBE_PLAYLISTS,
     READWISE_API_TOKEN,
     YOUTUBE_SYNC_INTERVAL_MINUTES,
     READWISE_SYNC_INTERVAL_MINUTES,
@@ -40,7 +43,23 @@ function loadConfig() {
     },
     youtube: {
       apiKey: YOUTUBE_API_KEY || '',
-      playlistId: YOUTUBE_PLAYLIST_ID || '',
+      // Support multiple playlists; legacy single playlist still respected.
+      playlists: (() => {
+        const list = [];
+        const add = (id, label) => {
+          if (id) list.push({ id: id.trim(), label });
+        };
+        if (YOUTUBE_PLAYLIST_ID) add(YOUTUBE_PLAYLIST_ID, 'youtube');
+        if (YOUTUBE_PLAYLIST_ID_VIDEO) add(YOUTUBE_PLAYLIST_ID_VIDEO, 'youtube');
+        if (YOUTUBE_PLAYLIST_ID_MUSIC) add(YOUTUBE_PLAYLIST_ID_MUSIC, 'music');
+        if (YOUTUBE_PLAYLISTS) {
+          YOUTUBE_PLAYLISTS.split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .forEach((id) => add(id, 'youtube'));
+        }
+        return list;
+      })(),
       syncIntervalMinutes: asNumber(YOUTUBE_SYNC_INTERVAL_MINUTES, 15),
     },
     readwise: {

@@ -16,7 +16,7 @@ function formatMessage(item) {
     item.description && item.description.length
       ? `\n\n${String(item.description).replace(/<[^>]+>/g, '').slice(0, 400)}`
       : '';
-  return `${item.title}${published}${link}${desc}`;
+  return `${item.title}- #blog${link}${desc}`;
 }
 
 async function syncRss({ rssClient, telegramClient, feeds, state, stateStore, logger }) {

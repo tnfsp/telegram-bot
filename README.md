@@ -19,7 +19,13 @@ Now also pulls RSS feeds (defaults: `https://wilsonchao.com/feed.xml`, `https://
    TELEGRAM_BOT_TOKEN=your_bot_token
    TELEGRAM_CHANNEL_ID=@your_channel_or_id
    YOUTUBE_API_KEY=your_youtube_api_key
-   YOUTUBE_PLAYLIST_ID=target_playlist_id
+   # YouTube playlists (supports multiple)
+   # Either use legacy YOUTUBE_PLAYLIST_ID or the dedicated ones below:
+   YOUTUBE_PLAYLIST_ID=target_playlist_id_optional
+   YOUTUBE_PLAYLIST_ID_VIDEO=video_playlist_id
+   YOUTUBE_PLAYLIST_ID_MUSIC=music_playlist_id
+   # Or provide a comma list:
+   # YOUTUBE_PLAYLISTS=playlist1,playlist2
    READWISE_API_TOKEN=your_readwise_token_optional
    RSS_FEEDS=https://wilsonchao.com/feed.xml,https://wilsonchao.com/daily/feed.xml
 

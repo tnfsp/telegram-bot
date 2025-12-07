@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_STATE = {
-  lastYouTubePublishedAt: null,
+  lastYouTubePublishedAt: {}, // keyed by playlistId
   lastReadwiseHighlightUpdatedAt: null,
   rss: {},
 };
@@ -30,7 +30,12 @@ class StateStore {
       }
       const raw = fs.readFileSync(this.filePath, 'utf-8');
       const parsed = JSON.parse(raw);
-      return { ...DEFAULT_STATE, ...parsed };
+      // Migrate legacy single-value lastYouTubePublishedAt to object.
+      const state = { ...DEFAULT_STATE, ...parsed };
+      if (typeof state.lastYouTubePublishedAt === 'string') {
+        state.lastYouTubePublishedAt = { default: state.lastYouTubePublishedAt };
+      }
+      return state;
     } catch (err) {
       this.logger.error({ err }, 'Failed to load state file, falling back to defaults');
       return { ...DEFAULT_STATE };
