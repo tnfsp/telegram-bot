@@ -52,17 +52,28 @@ class ReadwiseClient {
       return;
     }
 
-    await this.http.post('/highlights/', {
-      highlights: [
+    try {
+      await this.http.post('/highlights/', {
+        highlights: [
+          {
+            text,
+            title,
+            source_url: sourceUrl,
+            location_type: 'video',
+            location: 0,
+          },
+        ],
+      });
+    } catch (err) {
+      this.logger.error(
         {
-          text,
-          title,
-          source_url: sourceUrl,
-          location_type: 'video',
-          location: 0,
+          status: err.response?.status,
+          data: err.response?.data,
         },
-      ],
-    });
+        'Readwise highlight creation failed',
+      );
+      throw err;
+    }
   }
 }
 
