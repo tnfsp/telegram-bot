@@ -1,9 +1,9 @@
 function formatMessage(video, label = 'youtube') {
   const link = `https://www.youtube.com/watch?v=${video.id}`;
   if (label === 'music') {
-    return `🎵 好音樂　${video.title} #music\n\n${link}`;
+    return `🎵 Chill音樂　${video.title} #music\n\n${link}`;
   }
-  return `▶️ 有趣影片　${video.title}#youtube \n\n${link}`;
+  return `▶️ Cool影片　${video.title}#youtube \n\n${link}`;
 }
 
 async function syncYouTube({
