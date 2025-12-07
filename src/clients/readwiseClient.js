@@ -18,28 +18,39 @@ class ReadwiseClient {
     return Boolean(this.apiToken);
   }
 
-  async fetchHighlights() {
+  async fetchHighlights({ updatedAfter } = {}) {
     if (!this.canUse()) {
       throw new Error('Readwise API token missing');
     }
 
-    const { data } = await this.http.get('/highlights/', {
-      params: {
-        page_size: 100,
-        order: 'updated',
-      },
-    });
+    const params = {
+      page_size: 100,
+      order: 'updated',
+    };
+    if (updatedAfter) params.updated_after = updatedAfter;
 
-    const results = data?.results || [];
-    return results.map((item) => ({
-      id: item.id,
-      text: item.text,
-      title: item.title || item.book_title || 'Untitled',
-      sourceUrl: item.source_url || '',
-      note: item.note || '',
-      updatedAt: item.updated_at,
-      location: item.location,
-    }));
+    let pageCursor = undefined;
+    const items = [];
+    do {
+      const { data } = await this.http.get('/highlights/', {
+        params: pageCursor ? { ...params, pageCursor } : params,
+      });
+      const results = data?.results || [];
+      items.push(
+        ...results.map((item) => ({
+          id: item.id,
+          text: item.text,
+          title: item.title || item.book_title || 'Untitled',
+          sourceUrl: item.source_url || '',
+          note: item.note || '',
+          updatedAt: item.updated_at,
+          location: item.location,
+        })),
+      );
+      pageCursor = data?.nextPageCursor;
+    } while (pageCursor);
+
+    return items;
   }
 
   async saveHighlight({ text, title, sourceUrl, locationType = 'article', location = 0 }) {
