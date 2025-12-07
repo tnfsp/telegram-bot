@@ -1,13 +1,9 @@
-const { formatDistanceToNowStrict, parseISO } = require('date-fns');
-
 function formatMessage(video, label = 'youtube') {
   const link = `https://www.youtube.com/watch?v=${video.id}`;
   if (label === 'music') {
     return `🎵 好音樂　${video.title} #music\n\n${link}`;
   }
-  const published = formatDistanceToNowStrict(parseISO(video.publishedAt), { addSuffix: true });
-  const description = video.description ? `\n\n${video.description.slice(0, 400)}` : '';
-  return `▶️ 有趣影片　${video.title}#youtube \n\n${link}\nPublished ${published}.${description}`;
+  return `▶️ 有趣影片　${video.title}#youtube \n\n${link}`;
 }
 
 async function syncYouTube({
