@@ -19,6 +19,7 @@ async function syncReadwise({
     throw new Error('Readwise or Telegram client not configured');
   }
 
+  const lastUpdated = state.lastReadwiseHighlightUpdatedAt;
   const highlights = await readwiseClient.fetchHighlights({
     updatedAfter: lastUpdated,
   });
@@ -27,9 +28,8 @@ async function syncReadwise({
     return;
   }
 
-  const sorted = highlights
-    .filter((h) => h.updatedAt)
-    .sort((a, b) => compareAsc(parseISO(a.updatedAt), parseISO(b.updatedAt)));
+  const withDates = highlights.filter((h) => h.updatedAt);
+  const sorted = withDates.sort((a, b) => compareAsc(parseISO(a.updatedAt), parseISO(b.updatedAt)));
 
   let newHighlights;
   if (lastUpdated) {
