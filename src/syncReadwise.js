@@ -56,7 +56,7 @@ function buildMessage(highlight, book) {
   const sourceLabel = `\u4f86\u6e90: ${isMailto ? '(\u7121)' : normalized.sourceUrl || '\u7121'}`;
 
   const parts = [
-    '\U0001F4DA \u7cbe\u9078\u6458\u8981 #readwise',
+    '\u{1F4DA} \u7cbe\u9078\u6458\u8981 #readwise',
     normalized.title,
     `\u4f5c\u8005: ${normalized.author || '(\u672a\u77e5)'}`,
     sourceLabel,
