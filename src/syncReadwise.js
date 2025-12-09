@@ -6,6 +6,7 @@ function normalizeHighlight(highlight) {
   let derivedTitle = '';
   let derivedSourceUrl = '';
   const remaining = [];
+
   for (const raw of lines) {
     const line = raw.trim();
     if (!line) continue;
@@ -25,10 +26,12 @@ function normalizeHighlight(highlight) {
     (highlight.title && highlight.title.toLowerCase() !== 'untitled' && highlight.title) ||
     (derivedTitle && derivedTitle.toLowerCase() !== 'untitled' && derivedTitle) ||
     (highlight.bookTitle && highlight.bookTitle.toLowerCase() !== 'untitled' && highlight.bookTitle) ||
-    (highlight.book && highlight.book.title && highlight.book.title.toLowerCase() !== 'untitled' && highlight.book.title) ||
     '';
 
-  const title = cleanTitle ? `【${cleanTitle}】` : '【摘錄】';
+  const title =
+    (highlight.book && highlight.book.title) ||
+    cleanTitle ||
+    '(\u672a\u63d0\u4f9b\u6a19\u984c)';
 
   const bookSourceUrl = highlight.book && highlight.book.source_url;
   const bookReviewUrl = highlight.book && highlight.book.highlights_url;
@@ -40,8 +43,8 @@ function normalizeHighlight(highlight) {
     highlight.highlightUrl || // Readwise permalink
     bookReviewUrl || // Readwise book review URL
     '';
-  const text = remaining.join('\n') || highlight.text || '';
 
+  const text = remaining.join('\n') || highlight.text || '';
   const author = (highlight.book && highlight.book.author) || '';
 
   return { title, sourceUrl, text, author };
@@ -50,19 +53,21 @@ function normalizeHighlight(highlight) {
 function buildMessage(highlight, book) {
   const normalized = normalizeHighlight({ ...highlight, book });
   const isMailto = normalized.sourceUrl && /^mailto:/i.test(normalized.sourceUrl);
-  const sourceLabel = normalized.sourceUrl
-    ? `🔗 原文：${isMailto ? 'NIL' : normalized.sourceUrl}`
-    : '🔗 原文：未提供';
+  const sourceLabel = `\u4f86\u6e90: ${isMailto ? '(\u7121)' : normalized.sourceUrl || '\u7121'}`;
 
   const parts = [
-    '📚 精選摘錄 #readwise',
-    normalized.title || '【摘錄】',
+    '\U0001F4DA \u7cbe\u9078\u6458\u8981 #readwise',
+    normalized.title,
+    `\u4f5c\u8005: ${normalized.author || '(\u672a\u77e5)'}`,
+    sourceLabel,
+    '',
+    normalized.text || '(\u7a7a\u767d)',
   ];
-  if (normalized.author) parts.push(`✍️ 作者：${normalized.author}`);
-  parts.push(sourceLabel, '', '摘錄：', normalized.text || '(空白)');
+
   if (highlight.note) {
-    parts.push('', `💡 Note: ${highlight.note}`);
+    parts.push('', `Note: ${highlight.note}`);
   }
+
   return parts.join('\n');
 }
 

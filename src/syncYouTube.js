@@ -1,9 +1,9 @@
 function formatMessage(video, label = 'youtube') {
   const link = `https://www.youtube.com/watch?v=${video.id}`;
   if (label === 'music') {
-    return `🎵 Chill音樂　${video.title} #music\n\n${link}`;
+    return `\uD83C\uDFB5 Chill\u97f3\u6a02\u3000${video.title} #music\n\n${link}`;
   }
-  return `▶️ Cool影片　${video.title}#youtube \n\n${link}`;
+  return `\u25B6\uFE0F Cool \u5f71\u7247 ${video.title} #video\n\n${link}`;
 }
 
 async function syncYouTube({
@@ -60,7 +60,7 @@ async function syncYouTube({
           logger.info({ videoId: video.id, playlistId }, 'Saved highlight to Readwise');
         } catch (err) {
           logger.error({ err, videoId: video.id, playlistId }, 'Readwise highlight save failed (skipping)');
-          // Do not rethrow; state already updated so we don’t resend the same video.
+          // Do not rethrow; state already updated so we don't resend the same video.
         }
       }
     }
