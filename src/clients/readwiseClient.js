@@ -5,6 +5,7 @@ class ReadwiseClient {
     this.apiToken = apiToken;
     this.logger = logger;
     this.dryRun = dryRun;
+    this.bookCache = new Map();
     this.http = axios.create({
       baseURL: 'https://readwise.io/api/v2',
       timeout: 15000,
@@ -42,7 +43,10 @@ class ReadwiseClient {
           text: item.text,
           title: item.title || item.book_title || 'Untitled',
           bookTitle: item.book_title || '',
-          sourceUrl: item.source_url || '',
+          // Prefer the original source URL; fall back to the Readwise permalink if missing.
+          sourceUrl: item.source_url || item.url || '',
+          highlightUrl: item.url || '',
+          bookId: item.book_id || null,
           note: item.note || '',
           updatedAt: item.updated_at || item.updated,
           location: item.location,
@@ -86,6 +90,34 @@ class ReadwiseClient {
       );
       throw err;
     }
+  }
+
+  async fetchBooksByIds(ids = []) {
+    if (!this.canUse()) {
+      throw new Error('Readwise API token missing');
+    }
+    const unique = [...new Set(ids.filter(Boolean))];
+    if (!unique.length) return {};
+
+    const missing = unique.filter((id) => !this.bookCache.has(id));
+    for (const id of missing) {
+      try {
+        const { data } = await this.http.get(`/books/${id}/`);
+        this.bookCache.set(id, data);
+      } catch (err) {
+        this.logger.error(
+          { id, status: err.response?.status, data: err.response?.data },
+          'Readwise book fetch failed',
+        );
+      }
+    }
+
+    const result = {};
+    for (const id of unique) {
+      const book = this.bookCache.get(id);
+      if (book) result[id] = book;
+    }
+    return result;
   }
 }
 
