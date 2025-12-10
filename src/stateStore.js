@@ -35,6 +35,15 @@ class StateStore {
       if (typeof state.lastYouTubePublishedAt === 'string') {
         state.lastYouTubePublishedAt = { default: state.lastYouTubePublishedAt };
       }
+      // Guard against older state files storing null or other invalid shapes.
+      const isPlainObject = (value) => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+      if (!isPlainObject(state.lastYouTubePublishedAt)) {
+        this.logger.warn(
+          { value: state.lastYouTubePublishedAt },
+          'Invalid lastYouTubePublishedAt found in state; resetting to empty object',
+        );
+        state.lastYouTubePublishedAt = {};
+      }
       return state;
     } catch (err) {
       this.logger.error({ err }, 'Failed to load state file, falling back to defaults');
