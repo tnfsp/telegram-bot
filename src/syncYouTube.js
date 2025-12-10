@@ -27,11 +27,11 @@ async function syncYouTube({
       continue;
     }
 
-    const lastPublishedAt = state.lastYouTubePublishedAt?.[playlistId];
-    const sorted = items.sort((a, b) => new Date(a.publishedAt) - new Date(b.publishedAt));
+    const lastAddedAt = state.lastYouTubePublishedAt?.[playlistId];
+    const sorted = items.sort((a, b) => new Date(a.addedAt) - new Date(b.addedAt));
     let newItems = sorted;
-    if (lastPublishedAt) {
-      newItems = sorted.filter((item) => new Date(item.publishedAt) > new Date(lastPublishedAt));
+    if (lastAddedAt) {
+      newItems = sorted.filter((item) => new Date(item.addedAt) > new Date(lastAddedAt));
     } else {
       // First run: send only the latest video to avoid flooding.
       newItems = sorted.slice(-1);
@@ -45,9 +45,12 @@ async function syncYouTube({
     for (const video of newItems) {
       const message = formatMessage(video, label);
       await telegramClient.sendMessage(message);
-      logger.info({ videoId: video.id, playlistId }, 'Sent YouTube video to Telegram');
+      logger.info(
+        { videoId: video.id, playlistId, addedAt: video.addedAt },
+        'Sent YouTube video to Telegram',
+      );
 
-      state.lastYouTubePublishedAt[playlistId] = video.publishedAt;
+      state.lastYouTubePublishedAt[playlistId] = video.addedAt;
       stateStore.save(state);
 
       if (readwiseClient?.canUse()) {

@@ -51,6 +51,9 @@ class YouTubeClient {
           id: item.contentDetails?.videoId,
           title: item.snippet?.title,
           description: item.snippet?.description || '',
+          // Playlist addition time; use this to detect "new" entries regardless of original video publish date.
+          addedAt: item.snippet?.publishedAt,
+          // Original video publish timestamp (kept for reference/display if needed).
           publishedAt: item.contentDetails?.videoPublishedAt || item.snippet?.publishedAt,
         })) || [];
 
@@ -59,7 +62,7 @@ class YouTubeClient {
       if (!pageToken) break;
     }
 
-    return items.filter((item) => item.id && item.publishedAt);
+    return items.filter((item) => item.id && item.addedAt);
   }
 }
 
