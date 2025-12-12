@@ -28,10 +28,8 @@ function loadConfig() {
     LOG_LEVEL,
   } = process.env;
 
-  const defaultFeeds = [
-    'https://wilsonchao.com/feed.xml',
-    'https://wilsonchao.com/daily/feed.xml',
-  ];
+  // No default feeds; must be configured explicitly via RSS_FEEDS.
+  const defaultFeeds = [];
 
   const rssFeeds =
     RSS_FEEDS && RSS_FEEDS.trim().length > 0

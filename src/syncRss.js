@@ -3,10 +3,7 @@ const { parseISO, isAfter, compareAsc } = require('date-fns');
 function formatMessage(item) {
   const title = item.title || '(\u7121\u6a19\u984c)';
   const linkLine = item.link ? `\n${item.link}` : '';
-  const description = item.description ? String(item.description) : '';
-  const cleaned = description.replace(/<[^>]+>/g, '').trim().slice(0, 400);
-  const descBlock = cleaned ? `\n\n${cleaned}` : '';
-  return `\u{1F4F0} \u65b0\u6587\u7ae0 #blog\n${title}${linkLine}${descBlock}`;
+  return `\u{1F4F0} \u65b0\u6587\u7ae0 #blog\n${title}${linkLine}`;
 }
 
 async function syncRss({ rssClient, telegramClient, feeds, state, stateStore, logger }) {
