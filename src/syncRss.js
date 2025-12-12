@@ -1,4 +1,10 @@
-const { parseISO, isAfter, compareAsc } = require('date-fns');
+const { compareAsc } = require('date-fns');
+
+function parseRssDate(value) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isFinite(parsed.getTime()) ? parsed : null;
+}
 
 function formatMessage(item) {
   const title = item.title || '(\u7121\u6a19\u984c)';
@@ -22,20 +28,24 @@ async function syncRss({ rssClient, telegramClient, feeds, state, stateStore, lo
 
     const normalized = items
       .filter((it) => it.title)
-      .map((it) => ({
-        ...it,
-        publishedAt: it.publishedAt || null,
-      }));
+      .map((it) => {
+        const parsedDate = parseRssDate(it.publishedAt || it.pubDate || it.published || it.updated);
+        return {
+          ...it,
+          publishedAt: it.publishedAt || it.pubDate || it.published || it.updated || null,
+          parsedDate,
+        };
+      });
 
     const sorted = normalized
-      .filter((it) => it.publishedAt)
-      .sort((a, b) => compareAsc(parseISO(a.publishedAt), parseISO(b.publishedAt)));
+      .filter((it) => it.parsedDate)
+      .sort((a, b) => compareAsc(a.parsedDate, b.parsedDate));
 
     const last = state.rss?.[feedUrl];
     let newItems;
     if (last) {
-      const cutoff = parseISO(last);
-      newItems = sorted.filter((it) => isAfter(parseISO(it.publishedAt), cutoff));
+      const cutoff = parseRssDate(last);
+      newItems = cutoff ? sorted.filter((it) => it.parsedDate > cutoff) : sorted;
     } else {
       // First run: only send the latest article to avoid flooding.
       newItems = sorted.slice(-1);
@@ -51,7 +61,7 @@ async function syncRss({ rssClient, telegramClient, feeds, state, stateStore, lo
       await telegramClient.sendMessage(message);
       logger.info({ feedUrl, title: item.title }, 'Sent RSS item to Telegram');
       state.rss = state.rss || {};
-      state.rss[feedUrl] = item.publishedAt;
+      state.rss[feedUrl] = item.parsedDate ? item.parsedDate.toISOString() : item.publishedAt;
       stateStore.save(state);
     }
   }
