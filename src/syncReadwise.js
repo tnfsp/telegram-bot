@@ -65,7 +65,7 @@ function buildMessage(highlight, book) {
   ];
 
   if (highlight.note) {
-    parts.push('', `Note: ${highlight.note}`);
+    parts.push('', `\u{1F4A1} Note: ${highlight.note}`);
   }
 
   return parts.join('\n');
