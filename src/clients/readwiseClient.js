@@ -81,14 +81,13 @@ class ReadwiseClient {
         ],
       });
     } catch (err) {
-      this.logger.error(
-        {
-          status: err.response?.status,
-          data: err.response?.data,
-        },
-        'Readwise highlight creation failed',
-      );
-      throw err;
+      const status = err.response?.status;
+      const data = err.response?.data;
+      this.logger.error({ status, data }, 'Readwise highlight creation failed');
+      const clean = new Error(`Readwise API error ${status || err.message}`);
+      clean.status = status;
+      clean.responseData = data;
+      throw clean;
     }
   }
 
