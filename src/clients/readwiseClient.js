@@ -58,39 +58,6 @@ class ReadwiseClient {
     return items;
   }
 
-  async saveHighlight({ text, title, sourceUrl, locationType = 'article', location = 0 }) {
-    if (!this.canUse()) {
-      throw new Error('Readwise API token missing');
-    }
-
-    if (this.dryRun) {
-      this.logger.info({ title, sourceUrl }, 'DRY_RUN enabled: skipping Readwise highlight creation');
-      return;
-    }
-
-    try {
-      await this.http.post('/highlights/', {
-        highlights: [
-          {
-            text,
-            title,
-            source_url: sourceUrl,
-            location_type: locationType, // Readwise does not accept "video"; use "article" by default
-            location,
-          },
-        ],
-      });
-    } catch (err) {
-      const status = err.response?.status;
-      const data = err.response?.data;
-      this.logger.error({ status, data }, 'Readwise highlight creation failed');
-      const clean = new Error(`Readwise API error ${status || err.message}`);
-      clean.status = status;
-      clean.responseData = data;
-      throw clean;
-    }
-  }
-
   async fetchBooksByIds(ids = []) {
     if (!this.canUse()) {
       throw new Error('Readwise API token missing');

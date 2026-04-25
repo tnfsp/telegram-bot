@@ -9,7 +9,6 @@ function formatMessage(video, label = 'youtube') {
 async function syncYouTube({
   youtubeClient,
   telegramClient,
-  readwiseClient,
   playlists,
   state,
   stateStore,
@@ -52,20 +51,6 @@ async function syncYouTube({
 
       state.lastYouTubePublishedAt[playlistId] = video.addedAt;
       stateStore.save(state);
-
-      if (readwiseClient?.canUse()) {
-        try {
-          await readwiseClient.saveHighlight({
-            text: video.title,
-            title: video.title,
-            sourceUrl: `https://www.youtube.com/watch?v=${video.id}`,
-          });
-          logger.info({ videoId: video.id, playlistId }, 'Saved highlight to Readwise');
-        } catch (err) {
-          logger.error({ err, videoId: video.id, playlistId }, 'Readwise highlight save failed (skipping)');
-          // Do not rethrow; state already updated so we don't resend the same video.
-        }
-      }
     }
   }
 }

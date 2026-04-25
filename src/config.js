@@ -24,6 +24,7 @@ function loadConfig() {
     RSS_FEEDS,
     RSS_SYNC_INTERVAL_MINUTES,
     STATE_FILE_PATH,
+    HEARTBEAT_FILE_PATH,
     DRY_RUN,
     LOG_LEVEL,
   } = process.env;
@@ -75,6 +76,7 @@ function loadConfig() {
       syncIntervalMinutes: asNumber(RSS_SYNC_INTERVAL_MINUTES, 30),
     },
     stateFilePath: STATE_FILE_PATH || './data/state.json',
+    heartbeatFilePath: HEARTBEAT_FILE_PATH || './data/heartbeat.json',
     dryRun: (DRY_RUN || 'false').toLowerCase() === 'true',
     logLevel: LOG_LEVEL || 'info',
   };

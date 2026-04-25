@@ -10,6 +10,7 @@ const { syncYouTube } = require('./syncYouTube');
 const { syncReadwise } = require('./syncReadwise');
 const { syncRss } = require('./syncRss');
 const { createAlerter } = require('./alert');
+const { createHeartbeat } = require('./heartbeat');
 
 async function main() {
   const config = loadConfig();
@@ -28,6 +29,10 @@ async function main() {
     enabled: config.alerts.enabled,
     chatId: config.alerts.chatId || config.telegram.channelId,
   });
+  const heartbeat = createHeartbeat(
+    config.heartbeatFilePath || './data/heartbeat.json',
+    logger,
+  );
 
   const youtubeClient = new YouTubeClient(config.youtube.apiKey, logger);
   const readwiseClient = new ReadwiseClient(config.readwise.apiToken, logger, {
@@ -65,12 +70,12 @@ async function main() {
       await syncYouTube({
         youtubeClient,
         telegramClient,
-        readwiseClient,
         playlists: config.youtube.playlists,
         state,
         stateStore,
         logger,
       });
+      heartbeat.touch('youtube');
     } catch (err) {
       logger.error({ err }, 'YouTube sync failed');
       alerter.sendAlert(`YouTube sync failed: ${err.message || err}`, { err });
@@ -94,6 +99,7 @@ async function main() {
         stateStore,
         logger,
       });
+      heartbeat.touch('readwise');
     } catch (err) {
       logger.error({ err }, 'Readwise sync failed');
       alerter.sendAlert(`Readwise sync failed: ${err.message || err}`, { err });
@@ -118,6 +124,7 @@ async function main() {
         stateStore,
         logger,
       });
+      heartbeat.touch('rss');
     } catch (err) {
       logger.error({ err }, 'RSS sync failed');
       alerter.sendAlert(`RSS sync failed: ${err.message || err}`, { err });
