@@ -7,10 +7,30 @@ class RssClient {
     this.logger = logger;
     const agent = getProxyAgent(logger);
     this.http = axios.create({
-      timeout: 15000,
+      timeout: 30000,
       httpsAgent: agent,
       proxy: agent ? false : undefined,
     });
+    this.http.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const config = error.config;
+        if (!config || config.__retried) return Promise.reject(error);
+        const status = error.response?.status;
+        const retriable =
+          error.code === 'ECONNABORTED' ||
+          error.code === 'ECONNRESET' ||
+          error.code === 'ETIMEDOUT' ||
+          status === 429 ||
+          (status >= 500 && status < 600);
+        if (!retriable) return Promise.reject(error);
+        config.__retried = true;
+        if (this.logger) {
+          this.logger.warn(`[rss] retry once: ${error.code || status} ${config.url || ''}`);
+        }
+        return this.http.request(config);
+      }
+    );
     this.parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '',

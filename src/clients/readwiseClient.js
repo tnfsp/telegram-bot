@@ -8,11 +8,31 @@ class ReadwiseClient {
     this.bookCache = new Map();
     this.http = axios.create({
       baseURL: 'https://readwise.io/api/v2',
-      timeout: 15000,
+      timeout: 30000,
       headers: {
         Authorization: `Token ${apiToken}`,
       },
     });
+    this.http.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const config = error.config;
+        if (!config || config.__retried) return Promise.reject(error);
+        const status = error.response?.status;
+        const retriable =
+          error.code === 'ECONNABORTED' ||
+          error.code === 'ECONNRESET' ||
+          error.code === 'ETIMEDOUT' ||
+          status === 429 ||
+          (status >= 500 && status < 600);
+        if (!retriable) return Promise.reject(error);
+        config.__retried = true;
+        if (this.logger) {
+          this.logger.warn(`[readwise] retry once: ${error.code || status} ${config.url || ''}`);
+        }
+        return this.http.request(config);
+      }
+    );
   }
 
   canUse() {

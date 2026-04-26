@@ -6,8 +6,28 @@ class YouTubeClient {
     this.logger = logger;
     this.http = axios.create({
       baseURL: 'https://www.googleapis.com/youtube/v3',
-      timeout: 15000,
+      timeout: 30000,
     });
+    this.http.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const config = error.config;
+        if (!config || config.__retried) return Promise.reject(error);
+        const status = error.response?.status;
+        const retriable =
+          error.code === 'ECONNABORTED' ||
+          error.code === 'ECONNRESET' ||
+          error.code === 'ETIMEDOUT' ||
+          status === 429 ||
+          (status >= 500 && status < 600);
+        if (!retriable) return Promise.reject(error);
+        config.__retried = true;
+        if (this.logger) {
+          this.logger.warn(`[youtube] retry once: ${error.code || status} ${config.url || ''}`);
+        }
+        return this.http.request(config);
+      }
+    );
   }
 
   async fetchPlaylistItems(playlistId, maxPages = 2) {
