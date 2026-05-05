@@ -1,5 +1,33 @@
 const { loadConfig } = require('./config');
 const { createLogger } = require('./logger');
+
+/**
+ * Format an error object into a human-readable string, working around
+ * the axios AxiosError.from() bug where err.message is set to the literal
+ * string "Error" when the underlying error has no message.
+ *
+ * @param {string} prefix - Label for the error context (e.g. "YouTube sync failed")
+ * @param {unknown} err - The caught error object
+ * @returns {string}
+ */
+function formatErr(prefix, err) {
+  if (!err) return `${prefix}: (no error object)`;
+  const parts = [];
+  // Avoid the axios 'Error' literal trap — AxiosError.from() hardcodes "Error"
+  if (err.message && err.message !== 'Error') parts.push(err.message);
+  if (err.code) parts.push(`code=${err.code}`);
+  if (err.response?.status) parts.push(`http=${err.response.status}`);
+  if (err.config?.url) parts.push(`url=${err.config.url}`);
+  if (err.cause?.message) parts.push(`cause=${err.cause.message}`);
+  if (err.response?.data) {
+    const d = err.response.data;
+    parts.push(`body=${typeof d === 'string' ? d.slice(0, 200) : JSON.stringify(d).slice(0, 200)}`);
+  }
+  if (!parts.length && err.stack) parts.push(err.stack.split('\n').slice(0, 2).join(' | '));
+  if (!parts.length) parts.push(String(err));
+  return `${prefix}: ${parts.join(' | ')}`;
+}
+
 const { StateStore } = require('./stateStore');
 const { YouTubeClient } = require('./clients/youtubeClient');
 const { TelegramClient } = require('./clients/telegramClient');
@@ -28,6 +56,7 @@ async function main() {
   const alerter = createAlerter(telegramClient, logger, {
     enabled: config.alerts.enabled,
     chatId: config.alerts.chatId || config.telegram.channelId,
+    threadId: config.alerts.threadId,
   });
   const heartbeat = createHeartbeat(
     config.heartbeatFilePath || './data/heartbeat.json',
@@ -78,7 +107,7 @@ async function main() {
       heartbeat.touch('youtube');
     } catch (err) {
       logger.error({ err }, 'YouTube sync failed');
-      alerter.sendAlert(`YouTube sync failed: ${err.message || err}`, { err });
+      alerter.sendAlert(formatErr('YouTube sync failed', err), { err });
     }
   };
 
@@ -102,7 +131,7 @@ async function main() {
       heartbeat.touch('readwise');
     } catch (err) {
       logger.error({ err }, 'Readwise sync failed');
-      alerter.sendAlert(`Readwise sync failed: ${err.message || err}`, { err });
+      alerter.sendAlert(formatErr('Readwise sync failed', err), { err });
     }
   };
 
@@ -127,7 +156,7 @@ async function main() {
       heartbeat.touch('rss');
     } catch (err) {
       logger.error({ err }, 'RSS sync failed');
-      alerter.sendAlert(`RSS sync failed: ${err.message || err}`, { err });
+      alerter.sendAlert(formatErr('RSS sync failed', err), { err });
     }
   };
 

@@ -20,7 +20,7 @@ class TelegramClient {
     return Boolean(this.botToken && this.channelId);
   }
 
-  async sendMessage(text, { chatId } = {}) {
+  async sendMessage(text, { chatId, threadId } = {}) {
     if (!this.canSend()) {
       throw new Error('Telegram bot token or channel ID missing');
     }
@@ -40,6 +40,7 @@ class TelegramClient {
           chat_id: chatId || this.channelId,
           text,
           disable_web_page_preview: false,
+          ...(threadId ? { message_thread_id: Number(threadId) } : {}),
         });
         return;
       } catch (err) {

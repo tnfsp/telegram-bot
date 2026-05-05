@@ -1,4 +1,4 @@
-function createAlerter(telegramClient, logger, { enabled = true, chatId } = {}) {
+function createAlerter(telegramClient, logger, { enabled = true, chatId, threadId } = {}) {
   const canAlert = enabled && telegramClient && telegramClient.canSend();
 
   async function sendAlert(text, meta = {}) {
@@ -10,9 +10,20 @@ function createAlerter(telegramClient, logger, { enabled = true, chatId } = {}) 
     try {
       await telegramClient.sendMessage(`⚠️ Bridge alert\n${safeText}`, {
         chatId: chatId || telegramClient.channelId,
+        threadId,
       });
     } catch (err) {
-      logger?.error({ err, meta }, 'Failed to send alert');
+      logger?.error(
+        {
+          err,
+          meta,
+          errCode: err?.code,
+          errStatus: err?.response?.status,
+          errCause: err?.cause?.message,
+          errBody: err?.response?.data,
+        },
+        'Failed to send alert',
+      );
     }
   }
 

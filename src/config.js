@@ -12,6 +12,7 @@ function loadConfig() {
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHANNEL_ID,
     ALERT_CHAT_ID,
+    ALERT_THREAD_ID,
     ALERTS_ENABLED,
     YOUTUBE_API_KEY,
     YOUTUBE_PLAYLIST_ID,
@@ -45,6 +46,7 @@ function loadConfig() {
     alerts: {
       enabled: (ALERTS_ENABLED || 'true').toLowerCase() === 'true',
       chatId: ALERT_CHAT_ID || '',
+      threadId: ALERT_THREAD_ID || '',
     },
     youtube: {
       apiKey: YOUTUBE_API_KEY || '',
