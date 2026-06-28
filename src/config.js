@@ -79,6 +79,7 @@ function loadConfig() {
     },
     stateFilePath: STATE_FILE_PATH || './data/state.json',
     heartbeatFilePath: HEARTBEAT_FILE_PATH || './data/heartbeat.json',
+    lockFilePath: './data/bot.lock',
     dryRun: (DRY_RUN || 'false').toLowerCase() === 'true',
     logLevel: LOG_LEVEL || 'info',
   };

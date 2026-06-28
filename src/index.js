@@ -39,10 +39,16 @@ const { syncReadwise } = require('./syncReadwise');
 const { syncRss } = require('./syncRss');
 const { createAlerter } = require('./alert');
 const { createHeartbeat } = require('./heartbeat');
+const { acquireLock } = require('./instanceLock');
 
 async function main() {
   const config = loadConfig();
   const logger = createLogger(config.logLevel);
+
+  // Acquire single-instance lock before doing anything else.
+  // A second `npm start` will print an error and exit(1) immediately.
+  const lockFilePath = config.lockFilePath || './data/bot.lock';
+  acquireLock(lockFilePath, logger);
 
   const stateStore = new StateStore(config.stateFilePath, logger);
   const state = stateStore.load();
