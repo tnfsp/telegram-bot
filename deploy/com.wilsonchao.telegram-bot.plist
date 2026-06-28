@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Unique label for launchd -->
+  <key>Label</key>
+  <string>com.wilsonchao.telegram-bot</string>
+
+  <!-- Restart automatically if the process exits -->
+  <key>KeepAlive</key>
+  <true/>
+
+  <!-- Launch at agent load time (login) -->
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- Working directory: repo root so relative paths in .env resolve correctly -->
+  <key>WorkingDirectory</key>
+  <string>/Users/zhaoyixiang/Project/_tools/telegram-bot</string>
+
+  <!-- Command: node + entry point (absolute paths required by launchd) -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/node</string>
+    <string>/Users/zhaoyixiang/Project/_tools/telegram-bot/src/index.js</string>
+  </array>
+
+  <!-- Environment: load from shell profile so PATH/dotenv vars are available.
+       Adjust or remove if using a dedicated .env file read by dotenv instead. -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>/Users/zhaoyixiang</string>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <!-- Log files (created automatically; rotate manually or with newsyslog) -->
+  <key>StandardOutPath</key>
+  <string>/Users/zhaoyixiang/Project/_tools/telegram-bot/data/launchd-stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/zhaoyixiang/Project/_tools/telegram-bot/data/launchd-stderr.log</string>
+
+  <!-- Throttle: wait 10 s before restarting after a crash -->
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+</dict>
+</plist>
