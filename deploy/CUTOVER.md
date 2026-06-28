@@ -1,6 +1,36 @@
-# Cutover: Switch from manual `npm start` to launchd
+# Cutover guide
 
-This document describes how to switch the Telegram bot from a manually
+> ⚠️ **DO NOT load the launchd plist on Wilson's main machine (2026-06-28).**
+> This bot is ALREADY supervised by **PM2** (`pm2 id 2`, name `telegram-bot`,
+> `autorestart=true`). Loading the launchd plist would create a SECOND
+> supervisor competing with PM2 → two concurrent instances → the exact
+> duplicate-posting bug this change was meant to fix.
+>
+> The launchd plist in this `deploy/` folder is kept only as a reference for
+> a hypothetical PM2-free deployment. On the current machine, **PM2 is the
+> supervisor** — manage the bot with:
+>
+> ```bash
+> pm2 restart telegram-bot   # after a code change
+> pm2 logs telegram-bot      # view logs
+> pm2 save                   # persist the process list
+> ```
+>
+> Root cause of the original duplicate posts (confirmed 2026-06-28): the old
+> code saved RSS state only once after sending ALL items. PM2 restarted the
+> process mid-sync (crash-loop driven by node_modules being deleted by an
+> external cleanup tool), so an already-sent article was re-sent because the
+> cutoff hadn't been persisted yet. Fixed by per-item state persistence +
+> guid-set dedup + a single-instance PID lock.
+
+---
+
+## (Reference only) Switching to launchd on a PM2-free machine
+
+The steps below apply ONLY if you first remove the bot from PM2
+(`pm2 delete telegram-bot && pm2 save`). Otherwise skip this entire file.
+
+This describes how to switch the Telegram bot from a manually
 started process to a launchd LaunchAgent that auto-starts at login and
 auto-restarts after crashes.
 
