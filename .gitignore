@@ -1,9 +1,8 @@
 node_modules
 dist
 *.log
-data/state.json
-data/heartbeat.json
-data/.heartbeat-alert-cooldown
+# 整個 data/ 都是 runtime 狀態（state、heartbeat、lock、checkpoint、備份）
+data/
 .env
 coverage
 .DS_Store
